@@ -5,7 +5,7 @@ A unity tool to reduce the amount of clipping between clothing layers and charac
 
 Works very well, small issues with certain areas such as armpits as described below.
 
-### How To Setup:
+### Loading the Example:
 - Download the project
 
 - Open the Scene "Character Clipping Test Scene"
@@ -35,6 +35,8 @@ Works very well, small issues with certain areas such as armpits as described be
 ### Usage:
 
 - DO NOT RUN in any pose other than T or A pose - will get varying results
+
+- Setup a specific layer for testing occlusion and set this in the script
 
 - In editor use the "check" option as described above to run the simulation
 
