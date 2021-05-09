@@ -1,0 +1,19 @@
+*.exr
+*.exr.meta
+Library/
+Temp/
+Assets/TextMesh Pro/
+Assets/AssetPacks/
+Assets/AWSBuildUploader/Packages/
+obj/
+Assets/Plugins/
+Assets/Audio/KM_IntroSpeech.wav
+PersistRTSTodo.xlsx
+~$PersistRTSTodo.xlsx
+Assets/Scenes/TestScenes/TerrainTestScene.unity.meta
+Assets/Scenes/TestScenes/TerrainTestScene.unity
+Assets/Scenes/TestScenes/MovementTestScene/NavMesh.asset.meta
+Assets/Scenes/TestScenes/MovementTestScene/NavMesh.asset
+MemoryCaptures/
+Logs/
+NonUpload/
