@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 483b17d3a10cf5d46a0901bdb76a5884, type: 3}
+  m_Name: CacheResult_13_05_2021_12_01_49_149
+  m_EditorClassIdentifier: 
+  Setup:
+    InputMeshes:
+    - {fileID: -5066307187210552864, guid: bcaeea6d421bdd74fa55eaee8301d6e1, type: 3}
+    - {fileID: -6616314794576538037, guid: 119be7558dac46d4b8f46318c047aa7d, type: 3}
+    - {fileID: -4577963059606106872, guid: 119be7558dac46d4b8f46318c047aa7d, type: 3}
+    - {fileID: 4297235681770656149, guid: 119be7558dac46d4b8f46318c047aa7d, type: 3}
+    - {fileID: -6932107391309281799, guid: 119be7558dac46d4b8f46318c047aa7d, type: 3}
+    OutCheckDistance: 0.1
+    InCheckDistance: 0.1
+    MarginDistance: 0.062
+    LowerChain: 1
+  Result:
+    FinalMeshes:
+    - {fileID: 4300000, guid: 14d65186451c93545a23961df204c46e, type: 2}
+    - {fileID: 4300000, guid: 186e86e16afe0e643b07c2134595a71d, type: 2}
+    - {fileID: 4300000, guid: 7111b30f215004748814d8f1016d24cd, type: 2}
+    - {fileID: 4300000, guid: 1f61858507e4c36438e3aed2e3aa6978, type: 2}
+    - {fileID: 4300000, guid: b19637c81acb2a648bbee54cd53caa55, type: 2}

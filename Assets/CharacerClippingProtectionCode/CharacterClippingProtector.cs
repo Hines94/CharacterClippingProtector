@@ -19,37 +19,6 @@ public enum AsyncHarshness
     Harsh
 }
 
-public struct ClippingProtectorSetup
-{
-    public List<Mesh> InputMeshes;
-    public float OutCheckDistance;
-    public float InCheckDistance;
-    public float MarginDistance;
-    public bool LowerChain;
-
-    public bool SetupEqual(object obj)
-    {
-        if (!(obj is ClippingProtectorSetup)) {return false; }
-        ClippingProtectorSetup mys = (ClippingProtectorSetup)obj;
-        // Compare setup variables
-        if (OutCheckDistance != mys.OutCheckDistance) { return false; }
-        if(InCheckDistance != mys.InCheckDistance) { return false; }
-        if(MarginDistance != mys.MarginDistance) { return false; }
-        if(LowerChain != mys.LowerChain) { return false; }
-        //Compare mesh lists 
-        if(InputMeshes.Count != mys.InputMeshes.Count) { return false; }
-        var firstNotSecond = InputMeshes.Except(mys.InputMeshes).ToList();
-        var secondNotFirst = mys.InputMeshes.Except(InputMeshes).ToList();
-        if (firstNotSecond.Any() && secondNotFirst.Any()) { return false; }
-        //Success
-        return true;
-    }
-}
-public struct ClippingProtectorResult
-{
-    public List<Mesh> FinalMeshes;
-}
-
 public class CharacterClippingProtector : MonoBehaviour
 {
     [Tooltip("HAS TO BE SINGLE LAYER!! Unique Layer to use for checking meshes.")]
@@ -73,11 +42,16 @@ public class CharacterClippingProtector : MonoBehaviour
     public AsyncHarshness RunAsynch = AsyncHarshness.None;
     public CharClipDebugLevel DebugLevel = CharClipDebugLevel.None;
     public float DebugLineTime = 3f;
+    [Tooltip("Automatically rerun the simulation when changing a slider value?")]
+    public bool AutoRerunOnChange = true;
 
     Color[] MeshCols = new Color[] { Color.red, Color.blue, Color.green, Color.white, Color.grey, Color.cyan };
     Dictionary<SkinnedMeshRenderer,Mesh> OriginalMeshes = new Dictionary<SkinnedMeshRenderer, Mesh>();
+    public Dictionary<SkinnedMeshRenderer, Mesh> GetOriginalMeshes() { return OriginalMeshes; }
     List<GameObject> Colliders = new List<GameObject>();
     static Dictionary<ClippingProtectorSetup, ClippingProtectorResult> CachedResults = new Dictionary<ClippingProtectorSetup, ClippingProtectorResult>();
+    public Dictionary<ClippingProtectorSetup, ClippingProtectorResult> GetCachedResults() { return CachedResults; }
+    public ClippingProtectorSetup LastSetup;
     public void ResetCachedResults() { CachedResults = new Dictionary<ClippingProtectorSetup, ClippingProtectorResult>(); }
 
     /// <summary>
@@ -87,6 +61,8 @@ public class CharacterClippingProtector : MonoBehaviour
     public IEnumerator RunClippingSimulation(Action OnSimulationComplete = null)
     {
         //TODO best to run in T or A pose!
+        //TODO make sure that we are fully reset the meshes before re running!!
+
         //Make sure we are working with the propper meshes and not already partially hidden
         ResetMeshesToOriginal();
 
@@ -167,14 +143,16 @@ public class CharacterClippingProtector : MonoBehaviour
         //Add result to cache for quick rerun of any future meshes
         if(CacheResults)
         {
-            CachedResults.Add(new ClippingProtectorSetup
+            LastSetup = new ClippingProtectorSetup
             {
                 OutCheckDistance = OutwardCheckDistance,
                 InputMeshes = OriginalMeshes.Values.ToList(),
                 MarginDistance = MarginDistance,
                 InCheckDistance = InwardCheckDistance,
                 LowerChain = PreventLowerChainItems
-            },
+            };
+
+            CachedResults.Add(LastSetup,
             new ClippingProtectorResult
             {
                 FinalMeshes = FinalMeshes
@@ -307,26 +285,41 @@ public class CharacterClippingProtector : MonoBehaviour
     /// </summary>
     private bool CheckCached(ClippingProtectorSetup Check)
     {
+        //Check local cached
         foreach(ClippingProtectorSetup cs in CachedResults.Keys)
         {
             if(cs.SetupEqual(Check))
             {
-                OriginalMeshes = new Dictionary<SkinnedMeshRenderer, Mesh>();
-                if (DebugLevel != CharClipDebugLevel.None) Debug.Log("Existing simulation found!");
                 List<Mesh> NewMeshes = CachedResults[cs].FinalMeshes;
-                int Ind = 0;
-                foreach (SkinnedMeshRenderer smr in Meshes)
-                {
-                    if (smr == null || smr.sharedMesh == null) continue;
-                    OriginalMeshes.Add(smr, smr.sharedMesh);
-                    smr.sharedMesh = NewMeshes[Ind];
-                    Ind++;
-                }
+                SetFromCachedMeshes(NewMeshes);
                 return true;
             }
         }
+        //Check Saved cache scriptbales
+        ClippingProtectorResult Res = CharacterClippingScriptableResult.TryLoadCachedResult(Check);
+        if(Res.FinalMeshes != null && Res.FinalMeshes.Count > 0)
+        {
+            SetFromCachedMeshes(Res.FinalMeshes);
+            return true;
+        }
         return false;
     }
+
+    private void SetFromCachedMeshes(List<Mesh> NewMeshes)
+    {
+        OriginalMeshes = new Dictionary<SkinnedMeshRenderer, Mesh>();
+        if (DebugLevel != CharClipDebugLevel.None) Debug.Log("Existing simulation found!");
+        int Ind = 0;
+        foreach (SkinnedMeshRenderer smr in Meshes)
+        {
+            if (smr == null || smr.sharedMesh == null) continue;
+            OriginalMeshes.Add(smr, smr.sharedMesh);
+            smr.sharedMesh = NewMeshes[Ind];
+            Ind++;
+        }
+    }
+
+
 
     //Benefit from burst to speed this up significantly
     [BurstCompile(CompileSynchronously = true)]
@@ -435,7 +428,7 @@ public class CharacterClippingProtector : MonoBehaviour
     public Unity.EditorCoroutines.Editor.EditorCoroutine EditorCoroutine = null;
     private void OnValidate()
     {
-        if (OriginalMeshes.Count == 0) { return; }
+        if (!AutoRerunOnChange || OriginalMeshes.Count == 0) { return; }
         StartEditorCoroutine();
     }
 
