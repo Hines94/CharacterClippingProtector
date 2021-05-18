@@ -41,7 +41,7 @@ public class CharacterClippingScriptableResult : ScriptableObject
     }
 
 #if UNITY_EDITOR
-    public static void SaveLastResultToCache(CharacterClippingProtector ClipProtector)
+    public static CharacterClippingScriptableResult SaveLastResultToCache(CharacterClippingProtector ClipProtector)
     {
         if (ClipProtector.GetOriginalMeshes().Count > 0)
         {
@@ -52,12 +52,14 @@ public class CharacterClippingScriptableResult : ScriptableObject
             else
             {
                 Dictionary<ClippingProtectorSetup, ClippingProtectorResult> Cached = ClipProtector.GetCachedResults();
-                if (Cached.Count == 0) { EditorUtility.DisplayDialog("No Simulations", "No similations have been run", "I Will Run A Simulation"); return; }
-                CharacterClippingScriptableResult.SaveOutToCache(ClipProtector.LastSetup, Cached[ClipProtector.LastSetup]);
-                //TODO notify user of size
-
+                if (Cached.Count == 0) { EditorUtility.DisplayDialog("No Simulations", "No similations have been run", "I Will Run A Simulation"); return null; }
+                CharacterClippingScriptableResult Saved = CharacterClippingScriptableResult.SaveOutToCache(ClipProtector.LastSetup, Cached[ClipProtector.LastSetup]);
+                //Refresh Cache
+                RefreshResour();
+                return Saved;
             }
         }
+        return null;
     }
 
     public static CharacterClippingScriptableResult SaveOutToCache(ClippingProtectorSetup Setup, ClippingProtectorResult Result)
